@@ -2,11 +2,13 @@
 // Created by Dark on 07/07/2026.
 //
 #include <iostream>
+#include <vector>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 using namespace std;
 
 #define PORT "4360"
+#define BACKLOG "5"
 
 int main () {
 
@@ -36,15 +38,55 @@ int main () {
         return 2;
     }
     char ipstr[INET6_ADDRSTRLEN];
-    int socket, new_socket;
+    int socket, new_socket, yes=1;
     for (p = servinfo; p!= nullptr; p = p->ai_next) {
         if ((socket = (socket, p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR) {
-            cerr << "Socket creation failed\n";
+            cerr << "Socket creation failed\n" << WSAGetLastError() << endl;
             closesocket(socket);
             continue;
         }
 
-        
+        setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
+
+        if (bind(socket,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+            cerr << "Bind failed\n" << WSAGetLastError() << endl;
+            closesocket(socket);
+            continue;
+        }
+
+        if ((connect(socket,p->ai_addr, p->ai_addrlen)) == SOCKET_ERROR) {
+            cerr << "Connect failed\n" << WSAGetLastError() << endl;
+            closesocket(socket);
+            continue;
+        }
+        if (listen(socket, *BACKLOG) == SOCKET_ERROR) {
+            cerr << "Listen failed\n" << WSAGetLastError() << endl;
+            closesocket(socket);
+            continue;
+        }
+        struct sockaddr_storage client;
+        socklen_t addr_size = sizeof client;
+
+        new_socket = accept(socket, (struct sockaddr*)&client, &addr_size);
+        if (new_socket == SOCKET_ERROR) {
+            cerr << "Accept failed\n" << WSAGetLastError() << endl;
+            closesocket(socket);
+
+        }
+
+
+        vector<char> msg = {'M','S','G'};
+        int len , byte_sent;
+        len = strlen(msg.data());
+        msg.push_back('\0');
+        if ((byte_sent = send(new_socket, msg.data(), len, 0)) == SOCKET_ERROR) {
+            cerr << "Send failed\n" << WSAGetLastError() << endl;
+            closesocket(new_socket);
+        }
+        else {
+
+        }
+        closesocket(socket);
     }
 
 
