@@ -7,8 +7,7 @@
 #include <ws2tcpip.h>
 using namespace std;
 
-#define PORT "4360"
-#define BACKLOG "5"
+#define BACKLOG 5
 
 int main (int argc, char* argv[]) {
 
@@ -38,54 +37,49 @@ int main (int argc, char* argv[]) {
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
         hints.ai_flags = AI_PASSIVE;
-    if (status = getaddrinfo(nullptr, PORT, &hints, &servinfo) != 0) {
+    if ((status = getaddrinfo(nullptr, argv[1], &hints, &servinfo)) != 0) {
         cerr << "getaddrinfo failed\n" << gai_strerror(status) << endl;
         WSACleanup();
         return 2;
     }
     char ipstr[INET6_ADDRSTRLEN];
-    int socket, new_socket, yes=1;
+    int socket_fd, new_socket, yes=1;
     for (p = servinfo; p!= nullptr; p = p->ai_next) {
-        if ((socket = (socket, p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR) {
+        if ((socket_fd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == SOCKET_ERROR) {
             cerr << "Socket creation failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
+            closesocket(socket_fd);
             continue;
         }
 
-        setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
+        setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (const char*)&yes, sizeof(int));
 
-        if (bind(socket,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
+        if (bind(socket_fd,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
             cerr << "Bind failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
+            closesocket(socket_fd);
             continue;
         }
 
-        if ((connect(socket,p->ai_addr, p->ai_addrlen)) == SOCKET_ERROR) {
-            cerr << "Connect failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
-            continue;
-        }
-        if (listen(socket, *BACKLOG) == SOCKET_ERROR) {
+         if (listen(socket_fd, BACKLOG) == SOCKET_ERROR) {
             cerr << "Listen failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
+            closesocket(socket_fd);
             continue;
         }
         struct sockaddr_storage client;
         socklen_t addr_size = sizeof client;
 
-        new_socket = accept(socket, (struct sockaddr*)&client, &addr_size);
+        new_socket = accept(socket_fd, (struct sockaddr*)&client, &addr_size);
         if (new_socket == SOCKET_ERROR) {
             cerr << "Accept failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
+            closesocket(socket_fd);
 
         }
         const size_t BUFFER_SIZE = 1024;
         vector<char> buffer(BUFFER_SIZE);
         int recv_client;
 
-        if ((recv_client = recv(socket, buffer.data(), buffer.size(), 0)) <0 ) {
+        if ((recv_client = recv(socket_fd, buffer.data(), buffer.size(), 0)) <0 ) {
             cerr << "recv failed\n" << WSAGetLastError() << endl;
-            closesocket(socket);
+            closesocket(socket_fd);
         }
 
         vector<char> msg = {'M','S','G'};
@@ -99,7 +93,7 @@ int main (int argc, char* argv[]) {
         else {
             cout << " " << msg.data() << " sent successfully " << endl;
         }
-        closesocket(socket);
+        closesocket(socket_fd);
     }
 
     closesocket(new_socket);
