@@ -10,7 +10,7 @@ using namespace std;
 #define PORT "4360"
 #define BACKLOG "5"
 
-int main () {
+int main (int argc, char* argv[]) {
 
     WSAData wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
@@ -22,6 +22,12 @@ int main () {
         cerr << "WSA Version Not Supported\n";
         WSACleanup();
         return 2;
+    }
+
+    if (argc != 2) {
+        cerr << "Usage: " << argv[0] << " PORT\n";
+        WSACleanup();
+        return 1;
     }
 
     int status;
@@ -73,7 +79,14 @@ int main () {
             closesocket(socket);
 
         }
+        const size_t BUFFER_SIZE = 1024;
+        vector<char> buffer(BUFFER_SIZE);
+        int recv_client;
 
+        if ((recv_client = recv(socket, buffer.data(), buffer.size(), 0)) <0 ) {
+            cerr << "recv failed\n" << WSAGetLastError() << endl;
+            closesocket(socket);
+        }
 
         vector<char> msg = {'M','S','G'};
         int len , byte_sent;
@@ -84,11 +97,13 @@ int main () {
             closesocket(new_socket);
         }
         else {
-
+            cout << " " << msg.data() << " sent successfully " << endl;
         }
         closesocket(socket);
     }
 
-
+    closesocket(new_socket);
     freeaddrinfo(servinfo);
+    WSACleanup();
+    return 0;
 }
