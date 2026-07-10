@@ -4,7 +4,7 @@
 
 #define ssid "Wokwi-GUEST"
 #define password ""
-#define DHTPIN 2
+#define DHTPIN 15
 #define DHTTYPE 22
 DHT dht(DHTPIN,DHTTYPE);
 
@@ -14,8 +14,8 @@ int myFunction(int, int);
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  dht.begin();
   delay(200);
+  dht.begin();
   WiFi.begin(ssid,password,11);
   while (WiFi.status()!=WL_CONNECTED){
     delay(500);
@@ -28,7 +28,17 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  float Temp = dht.readTemperature();
+  float Humidity = dht.readHumidity();
 
+  if (isnan(Temp) || isnan(Humidity) ){
+    Serial.println("Failed to read temperature and humidity");
+  }
+    Serial.println("");
+    Serial.print("Temperature is: ");
+    Serial.print(Temp);
+    Serial.print("  | Humidity is: ");
+    Serial.print(Humidity);
 }
 
 // put function definitions here:
