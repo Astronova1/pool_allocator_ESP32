@@ -58,11 +58,11 @@ int main (int argc, char* argv[]) {
             closesocket(socket_fd);
             continue;
         }
+    }
 
          if (listen(socket_fd, BACKLOG) == SOCKET_ERROR) {
             cerr << "Listen failed\n" << WSAGetLastError() << endl;
             closesocket(socket_fd);
-            continue;
         }
         struct sockaddr_storage client;
         socklen_t addr_size = sizeof client;
@@ -72,12 +72,13 @@ int main (int argc, char* argv[]) {
             cerr << "Accept failed\n" << WSAGetLastError() << endl;
             closesocket(socket_fd);
 
+
         }
         const size_t BUFFER_SIZE = 1024;
         vector<char> buffer(BUFFER_SIZE);
         int recv_client;
 
-        if ((recv_client = recv(socket_fd, buffer.data(), buffer.size(), 0)) <0 ) {
+        if ((recv_client = recv(new_socket, buffer.data(), buffer.size(), 0)) <0 ) {
             cerr << "recv failed\n" << WSAGetLastError() << endl;
             closesocket(socket_fd);
         }
@@ -94,7 +95,6 @@ int main (int argc, char* argv[]) {
             cout << " " << msg.data() << " sent successfully " << endl;
         }
         closesocket(socket_fd);
-    }
 
     closesocket(new_socket);
     freeaddrinfo(servinfo);
