@@ -1,6 +1,10 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include "DHT.h"
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <netdb.h>
+
 
 #define ssid "Wokwi-GUEST"
 #define password ""
@@ -23,11 +27,20 @@ void setup() {
   }
   Serial.println("Connected");
 
+  int status;
+  struct addrinfo hints, *res;
+  memset(&hints, 0, sizeof hints);
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+
+  if ((status = getaddrinfo("host.wokwi.internal","8088", &hints, &res))
+
   int result = myFunction(2, 3);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  delay(500);
   float Temp = dht.readTemperature();
   float Humidity = dht.readHumidity();
 
