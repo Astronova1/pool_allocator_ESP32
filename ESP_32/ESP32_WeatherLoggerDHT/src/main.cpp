@@ -4,15 +4,20 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netdb.h>
+#include <arpa/inet.h>
 #include "esp_log.h"
 
 #define ssid "Wokwi-GUEST"
 #define password ""
+#define PORT "8088"
 #define DHTPIN 15
 #define DHTTYPE 22
 DHT dht(DHTPIN,DHTTYPE);
 
 static const char *TAG = "Wokwi_App";
+
+  int socket_fd;
+
 
 // put function declarations here:
 int myFunction(int, int);
@@ -37,35 +42,58 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Connected");
-
+/*
   int status;
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  if ((status = getaddrinfo("host.wokwi.internal","8088", &hints, &res)) != 0){
-      ESP_LOGI(TAG,"DNS Resolution Failed");
+  if ((status = getaddrinfo("host.wokwi.internal",PORT, &hints, &res)) != 0){
+      Serial.println("DNS Resolution Failed");
       return;
   }
 
-  int socket_fd;
 
-  if ((socket_fd = socket(res->ai_family,res->ai_socktype,res->ai_protocol) == -1 )){
-    ESP_LOGI(TAG,"Socket Creation Error");
+  if ((socket_fd = socket(res->ai_family,res->ai_socktype,res->ai_protocol)) == -1 ){
+    Serial.println("Socket Creation Error");
     return;
   }
   char s [INET6_ADDRSTRLEN];
 
   inet_ntop(res->ai_family,getaddr_info((sockaddr *)res->ai_addr),s , sizeof s);
-  ESP_LOGI(TAG,"Attepmting to connect to "+ s);
 
   if (connect(socket_fd, res->ai_addr, res->ai_addrlen) == -1){
-        ESP_LOGI(TAG,"Cannot Connect");
-        closesocket(socket_fd);
+        Serial.println("Cannot Connect");
+        close(socket_fd);
         return;
   }
-    ESP_LOGI(TAG,"Connected to "+ s);
+
+  */
+// ... inside setup() after WiFi is connected ...
+
+int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+if (socket_fd == -1) {
+    Serial.println("Socket Creation Error!");
+    return;
+}
+
+struct sockaddr_in server_addr;
+memset(&server_addr, 0, sizeof(server_addr));
+server_addr.sin_family = AF_INET;
+server_addr.sin_port = htons(8088); // Your server port
+
+// Use 10.13.37.1 based on your active Wokwi network interface string
+if (inet_pton(AF_INET, "192.168.100.105", &server_addr.sin_addr) <= 0) {
+    Serial.println("Invalid address / Address not supported");
+}
+
+Serial.println("Attempting to connect to server directly...");
+if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+    Serial.printf("Cannot Connect! Error code: %d\n", errno);
+        while(true) { delay(1000); } // Safely stalls the ESP32 here so it never enters loop()
+}
+Serial.println("Successfully Connected to local server!");
 
 
   int result = myFunction(2, 3);
@@ -86,7 +114,15 @@ void loop() {
     Serial.print("  | Humidity is: ");
     Serial.print(Humidity);
 
+  char payload [16];
+  dtostrf(Temp, 6, 2, payload);
 
+  int len,byte_sen;
+  len = strlen(payload);
+
+  if ((byte_sen = send(socket_fd, payload, len, 0)) == 0){
+          Serial.printf(TAG,"Failed To send ");
+  }
 }
 
 // put function definitions here:
