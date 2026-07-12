@@ -1,0 +1,10 @@
+# IDE settings
+.idea/
+
+# CMake build directories
+cmake-build-debug/
+cmake-build-release-wsl/
+
+# Compiled binaries and object files
+*.exe
+*.obj
