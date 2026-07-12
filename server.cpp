@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
     struct sockaddr_storage client;
     socklen_t addr_size = sizeof client;
     memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
     if ((status = getaddrinfo(nullptr, argv[1], &hints, &servinfo)) != 0) {
@@ -74,7 +74,6 @@ int main(int argc, char *argv[]) {
     }
 
     while (true) {
-        Sleep(5000);
         new_socket = accept(socket_fd, (struct sockaddr*)&client, &addr_size);
         if (new_socket == SOCKET_ERROR) {
             cerr << "Accept failed\n" << WSAGetLastError() << endl;
@@ -94,7 +93,6 @@ int main(int argc, char *argv[]) {
         cout << "Connected to client: " << ipstr << endl;
         recv_client = recv(new_socket, buffer.data(), buffer.size(), 0);
         while (recv_client > 0) {
-            //}else if (recv_client > 0) {
                 cout << "Received from ESP32: " << string(buffer.data(), recv_client) << endl;
 
             recv_client = recv(new_socket, buffer.data(), buffer.size(), 0);
@@ -117,7 +115,6 @@ int main(int argc, char *argv[]) {
         // else {
         //     cout << " " << msg.data() << " sent successfully " << endl;
         // }
-        Sleep(5000);
         closesocket(new_socket);
     }
         closesocket(socket_fd);
