@@ -42,11 +42,11 @@ void setup() {
     Serial.print(".");
   }
   Serial.println("Connected");
-/*
+
   int status;
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
-  hints.ai_family = AF_UNSPEC;
+  hints.ai_family = AF_INET;
   hints.ai_socktype = SOCK_STREAM;
 
   if ((status = getaddrinfo("host.wokwi.internal",PORT, &hints, &res)) != 0){
@@ -63,16 +63,24 @@ void setup() {
 
   inet_ntop(res->ai_family,getaddr_info((sockaddr *)res->ai_addr),s , sizeof s);
 
+Serial.println("Attempting to connect to server directly...");
+if (connect(socket_fd, res->ai_addr, res->ai_addrlen) == -1) {
+    Serial.printf("Cannot Connect! Error code: %d\n", errno);
+        while(true) { delay(1000); } // Safely stalls the ESP32 here so it never enters loop()
+}
+Serial.println("Successfully Connected to local server!");
+freeaddrinfo(res);
+/*
+
   if (connect(socket_fd, res->ai_addr, res->ai_addrlen) == -1){
         Serial.println("Cannot Connect");
         close(socket_fd);
         return;
   }
-
-  */
+*/
 // ... inside setup() after WiFi is connected ...
-
-int socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+/*
+socket_fd = socket(AF_INET, SOCK_STREAM, 0);
 if (socket_fd == -1) {
     Serial.println("Socket Creation Error!");
     return;
@@ -88,13 +96,7 @@ if (inet_pton(AF_INET, "192.168.100.105", &server_addr.sin_addr) <= 0) {
     Serial.println("Invalid address / Address not supported");
 }
 
-Serial.println("Attempting to connect to server directly...");
-if (connect(socket_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
-    Serial.printf("Cannot Connect! Error code: %d\n", errno);
-        while(true) { delay(1000); } // Safely stalls the ESP32 here so it never enters loop()
-}
-Serial.println("Successfully Connected to local server!");
-
+*/
 
   int result = myFunction(2, 3);
 }
@@ -121,7 +123,7 @@ void loop() {
   len = strlen(payload);
 
   if ((byte_sen = send(socket_fd, payload, len, 0)) == 0){
-          Serial.printf(TAG,"Failed To send ");
+    Serial.printf(TAG,"Failed To send ");
   }
 }
 
