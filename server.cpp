@@ -9,7 +9,7 @@ using namespace std;
 
 #define BACKLOG 5
 
-int main (int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     WSAData wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
         cerr << "WSA Startup failed\n";
@@ -54,7 +54,7 @@ int main (int argc, char* argv[]) {
 
         if (bind(socket_fd,p->ai_addr, p->ai_addrlen) == SOCKET_ERROR) {
             cerr << "Bind failed\n" << WSAGetLastError() << endl;
-          loop   closesocket(socket_fd);
+            closesocket(socket_fd);
             continue;
         }
         break;
@@ -75,7 +75,7 @@ int main (int argc, char* argv[]) {
     while (true) {
         struct sockaddr_storage client;
         socklen_t addr_size = sizeof client;
-
+        Sleep(5000);
         new_socket = accept(socket_fd, (struct sockaddr*)&client, &addr_size);
         if (new_socket == SOCKET_ERROR) {
             cerr << "Accept failed\n" << WSAGetLastError() << endl;
@@ -84,6 +84,15 @@ int main (int argc, char* argv[]) {
         const size_t BUFFER_SIZE = 1024;
         vector<char> buffer(BUFFER_SIZE);
         int recv_client;
+
+        if (((struct sockaddr*)&client)->sa_family == AF_INET) {
+            inet_ntop(client.ss_family,&((struct sockaddr_in*)&client)->sin_addr,ipstr, sizeof ipstr);
+        }
+        if (((struct sockaddr*)&client)->sa_family == AF_INET6) {
+            inet_ntop(client.ss_family,&((struct sockaddr_in6 *)&client)->sin6_addr, ipstr, sizeof ipstr);
+        }
+
+        cout << "Connected to client: " << ipstr << endl;
 
         if ((recv_client = recv(new_socket, buffer.data(), buffer.size(), 0)) <0 ) {
             cerr << "recv failed\n" << WSAGetLastError() << endl;
@@ -95,16 +104,17 @@ int main (int argc, char* argv[]) {
         int len , byte_sent;
         len = strlen(msg.data());
         msg.push_back('\0');
-        if ((byte_sent = send(new_socket, msg.data(), len, 0)) == SOCKET_ERROR) {
-            cerr << "Send failed\n" << WSAGetLastError() << endl;
-            closesocket(new_socket);
-        }
-        else {
-            cout << " " << msg.data() << " sent successfully " << endl;
-        }
+        // if ((byte_sent = send(new_socket, msg.data(), len, 0)) == SOCKET_ERROR) {
+        //     cerr << "Send failed\n" << WSAGetLastError() << endl;
+        //     closesocket(new_socket);
+        // }
+        // else {
+        //     cout << " " << msg.data() << " sent successfully " << endl;
+        // }
+        Sleep(5000);
         closesocket(new_socket);
     }
-        closesocket(new_socket);;
+        closesocket(socket_fd);
         WSACleanup();
         return 0;
 }
