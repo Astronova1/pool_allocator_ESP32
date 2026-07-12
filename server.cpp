@@ -31,7 +31,8 @@ int main(int argc, char *argv[]) {
     int status;
     struct addrinfo hints;
     struct addrinfo *servinfo, *p;
-
+    struct sockaddr_storage client;
+    socklen_t addr_size = sizeof client;
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
@@ -73,8 +74,6 @@ int main(int argc, char *argv[]) {
     }
 
     while (true) {
-        struct sockaddr_storage client;
-        socklen_t addr_size = sizeof client;
         Sleep(5000);
         new_socket = accept(socket_fd, (struct sockaddr*)&client, &addr_size);
         if (new_socket == SOCKET_ERROR) {
@@ -93,12 +92,19 @@ int main(int argc, char *argv[]) {
         }
 
         cout << "Connected to client: " << ipstr << endl;
+        recv_client = recv(new_socket, buffer.data(), buffer.size(), 0);
+        while (recv_client > 0) {
+            //}else if (recv_client > 0) {
+                cout << "Received from ESP32: " << string(buffer.data(), recv_client) << endl;
 
-        if ((recv_client = recv(new_socket, buffer.data(), buffer.size(), 0)) <0 ) {
-            cerr << "recv failed\n" << WSAGetLastError() << endl;
-            continue;
+            recv_client = recv(new_socket, buffer.data(), buffer.size(), 0);
         }
-        cout << "Received from ESP32: " << string(buffer.data(), recv_client) << endl;
+        if (recv_client == 0){
+        cerr << "Connection closed. Client stopped communicating\n" << WSAGetLastError() << endl;
+        }
+        else if (recv_client  < 0 ) {
+           cerr << "recv failed\n" << WSAGetLastError() << endl;
+        }
 
         vector<char> msg = {'M','S','G'};
         int len , byte_sent;
