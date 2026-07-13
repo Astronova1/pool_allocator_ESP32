@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {                                      //initil
             while (token != nullptr) {
                 num.push_back(atoi(token));
                 token = strtok(nullptr, ",");
-
+            }
             if (num.size() >= 2) {
                 float Temp = num[0];
                 float Humidity = num[1];
