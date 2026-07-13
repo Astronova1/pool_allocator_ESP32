@@ -105,7 +105,9 @@ void loop() {
   // put your main code here, to run repeatedly:
   delay(500);
   float Temp = dht.readTemperature();
+  delay(100);
   float Humidity = dht.readHumidity();
+  delay(100);
 
   if (isnan(Temp) || isnan(Humidity) ){
     Serial.println("Failed to read temperature and humidity");
@@ -116,14 +118,16 @@ void loop() {
     Serial.print("  | Humidity is: ");
     Serial.print(Humidity);
 
-  char payload [16];
-  dtostrf(Temp, 6, 2, payload);
+  char payload [124];
+  //dtostrf(Temp, 6, 2, payload);
 
   int len,byte_sen;
   len = strlen(payload);
-
+  
+   snprintf(payload,sizeof payload, "%.2f,%.2f", Temp, Humidity);
+  Serial.println(payload);
   if ((byte_sen = send(socket_fd, payload, len, 0)) == 0){
-    Serial.printf(TAG,"Failed To send ");
+    Serial.println("Failed To send ");
   }
 }
 
