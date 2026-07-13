@@ -119,13 +119,11 @@ void loop() {
     Serial.print(Humidity);
 
   char payload [124];
-  //dtostrf(Temp, 6, 2, payload);
 
   int len,byte_sen;
   len = strlen(payload);
   
    snprintf(payload,sizeof payload, "%.2f,%.2f", Temp, Humidity);
-  Serial.println(payload);
   if ((byte_sen = send(socket_fd, payload, len, 0)) == 0){
     Serial.println("Failed To send ");
   }
