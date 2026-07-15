@@ -9,7 +9,7 @@
 int memory_allocation_speed(const int count,const int size) {
     auto start = std::chrono::steady_clock::now();          //chrono to measue the time
     for (int i = 0; i < count; i++) {
-        auto buffer = std::make_unique<char[]>(size);
+        auto buffer = std::make_unique_for_overwrite<char[]>(size);
         //char* buffer = new char[size];
         //memset(buffer.get(), 0, size);                                           //store something in buffer so compiler doesnt optimize or ignore buffer
         //delete [] buffer;
