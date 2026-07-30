@@ -38,9 +38,9 @@ send(socket_fd, payload, strlen(payload), 0);
 
 ## ⚙️ Build & Compilation Guide
 
-* **Microsoft Visual C++ Compiler (MSVC / Developer Command Prompt)
+* Microsoft Visual C++ Compiler (MSVC / Developer Command Prompt)
 
-* ***To compile the native Windows server or client using MSVC's commandline compiler (cl), link directly against the Windows Sockets library (ws2_32.lib):
+* To compile the native Windows server or client using MSVC's commandline compiler (cl), link directly against the Windows Sockets library (ws2_32.lib):
 
 ### Compile Server:
 ```cmd
@@ -52,7 +52,7 @@ cl client.cpp /EHsc /Fe:client.exe ws2_32.lib
 ```
 ### GCC / MinGW Compiler (g++)
 
-* ***If compiling via GCC on Windows or Linux:
+* **If compiling via GCC on Windows or Linux:**
 
 ### Compile Server:
 ```cmd
@@ -61,17 +61,17 @@ g++ -o server.exe server.cpp -lws2_32
 
 ## 🏃 Running the Pipeline
 
-* **Launch the Server: Run the compiled binary inside your terminal, specifying the listening port:
+* **Launch the Server**: Run the compiled binary inside your terminal, specifying the listening port:
 ```cmd
 server.exe 8088
 ```
 
 ### Execute Microcontroller Firmware:
-* ***Open the project inside the Wokwi Simulation Environment.
-* ***Ensure setup() resolves the gateway address using getaddrinfo("host.wokwi.internal", "8088", &hints, &res).
-* ***Start the simulation to establish the socket connection and observe live binary metric parsing in your desktop server console!
+* Open the project inside the Wokwi Simulation Environment.
+* Ensure setup() resolves the gateway address using getaddrinfo("host.wokwi.internal", "8088", &hints, &res).
+* Start the simulation to establish the socket connection and observe live binary metric parsing in your desktop server console!
 
 ## 🔮 Upcoming Enhancements
 
-* **Custom Memory Pool Integration: Intercepting incoming socket buffers with a custom, high-performance C++ arena pool allocator to eliminate OS-level heap fragmentation during high-frequency packet intake.
-* **Multi-Threaded Worker Pool: Transitioning client connection handling to a thread pool model using std::thread and std::mutex synchronization primitives.
+* **Custom Memory Pool Integration:** Intercepting incoming socket buffers with a custom, high-performance C++ arena pool allocator to eliminate OS-level heap fragmentation during high-frequency packet intake.
+* **Multi-Threaded Worker Pool:** Transitioning client connection handling to a thread pool model using std::thread and std::mutex synchronization primitives.
