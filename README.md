@@ -41,6 +41,6 @@ struct TelemetryPacket {
 
 
 ## Compile with 
-```
+```bash
 cl server.cpp /EHsc /Fe:server.exe ws2_32.lib
 ```
