@@ -27,25 +27,14 @@ Instead of relying on slow text-based formats like JSON or HTTP protocols, this 
 
 ## 📡 Architecture & Memory Layout
 
-### 1. Telemetry Data Structure
-Data is packed into an unpadded 20-byte binary layout to minimize network bandwidth consumption:
+### 1. Payload Serialization
+Data is currently formatted on the ESP32 using ASCII float conversion (`dtostrf`) and transmitted across the raw socket stream:
 
 ```cpp
-struct TelemetryPacket {
-    uint32_t client_id;  // Unique client hardware identifier
-    uint32_t packet_id;  // Sequence counter tracking dropped packets
-    float position_x;    // Coordinate payload / Sensor parameter A (Temperature)
-    float position_y;    // Coordinate payload / Sensor parameter B (Humidity)
-    float sensor_value;  // Secondary telemetry reading
-};
+char payload[16];
+dtostrf(Temp, 6, 2, payload); // Formats temperature float into character array
+send(socket_fd, payload, strlen(payload), 0);
 ```
-## Connection Sequence
-
-[ESP32 Microcontroller / Simulation] ──► [lwIP Network Stack] ──► [Wokwi Local Gateway]
-                                                                          │
-                                                                 (TCP Port 8088)
-                                                                          │
-[Winsock2 Server Interface] ◄── [recv() Raw Byte Buffer] ◄────────────────┘
 
 ## ⚙️ Build & Compilation Guide
 
